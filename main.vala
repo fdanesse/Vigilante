@@ -20,7 +20,6 @@ public class Camara : GLib.Object{
     private static Gst.Bus bus;
     private static GLib.MainLoop loop = new MainLoop();
 
-    private int cont = 0;
     private static string BASE_PATH;
 
     private static int CURRENT_HOUR = 0;        //Cuando cambia la hora, cambia el path
@@ -35,43 +34,26 @@ public class Camara : GLib.Object{
         Gst.Element camara = Gst.ElementFactory.make("v4l2src", "v4l2src");
         Gst.Element videoconvert = Gst.ElementFactory.make("videoconvert", "videoconvert");
         Gst.Element gdkpixbufsink = Gst.ElementFactory.make("gdkpixbufsink", "gdkpixbufsink");
-        bus = player.get_bus();
-        bus.add_watch(100, sync_message);
+        bus = player.get_bus(); bus.add_watch(100, sync_message);
 
         //camara.set("device", "/dev/video1");
 
-        player.add(camara);
-        player.add(videoconvert);
-        player.add(gdkpixbufsink);
+        player.add(camara); player.add(videoconvert); player.add(gdkpixbufsink);
+        camara.link(videoconvert); videoconvert.link(gdkpixbufsink);
 
-        camara.link(videoconvert);
-        videoconvert.link(gdkpixbufsink);
-
-        player.set_state(Gst.State.PLAYING);
-        loop.run();
+        player.set_state(Gst.State.PLAYING); loop.run();
     }
 
     private bool sync_message(Gst.Bus bus, Gst.Message message){
         switch(message.type){
             case Gst.MessageType.ERROR:
-                GLib.Error err;
-                string debug;
+                GLib.Error err; string debug;
                 message.parse_error(out err, out debug);
                 GLib.stdout.printf("Error: %s\n", err.message);
-                GLib.stdout.flush();
-                loop.quit();
-                break;
+                GLib.stdout.flush(); loop.quit(); break;
             default:
-                //https://people.sugarlabs.org/ignacio/Archivos/Archivos/turtleart/plugins/camera_sensor/tacamera.py
-                if (message.get_structure().get_name() == "pixbuf"){
-                    if (cont < 50)
-                        get_pixbuf();
-                    else
-                        loop.quit();
-                    }
-                break;
-               }
-
+                if (message.get_structure().get_name() == "pixbuf"){get_pixbuf();}
+                break;}
         return true;
         }
 
@@ -84,12 +66,9 @@ public class Camara : GLib.Object{
 
     private void set_path_dir_and_file_path(){
         Gst.DateTime time = new Gst.DateTime.now_local_time();
-        int anio = time.get_year();
-        int mes = time.get_month();
-        int dia = time.get_day();
-        int hora = time.get_hour();
-        //int minuto = time.get_minute();
-        //int segundo = time.get_second();
+        int anio = time.get_year(); int mes = time.get_month();
+        int dia = time.get_day(); int hora = time.get_hour();
+        //int minuto = time.get_minute(); int segundo = time.get_second();
 
         if (hora != CURRENT_HOUR){
             CURRENT_HOUR = hora;
@@ -114,13 +93,8 @@ public class Camara : GLib.Object{
         GLib.File file = GLib.File.new_for_path(path);
         if (file.query_exists() != true){
             Gst.Element sink = player.get_by_name("gdkpixbufsink");
-            Gdk.Pixbuf pixbuf;
-            sink.get("last-pixbuf", out pixbuf);
+            Gdk.Pixbuf pixbuf; sink.get("last-pixbuf", out pixbuf);
             pixbuf.save(path, "png", null);}
-
-        //string filepath = GLib.Path.build_filename(BASE_PATH, "%i".printf(cont));
-        //cont ++;
-        //pixbuf.save(filepath, "png", null);
     }
 
 }
