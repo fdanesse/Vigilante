@@ -1,0 +1,12 @@
+{
+    "categoria":"", 
+    "url":"", 
+    "mimetypes":"", 
+    "version":"1", 
+    "path":"/home/flavio/BatovideWorkSpace/Vigilante", 
+    "descripcion":"", 
+    "nombre":"Vigilante", 
+    "autores":"", 
+    "main":"main.py", 
+    "licencia":"GPL3"
+}
