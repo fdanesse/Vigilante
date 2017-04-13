@@ -12,6 +12,7 @@ Camara/
                 etc...
 */
 
+
 public class Camara : GLib.Object{
 
     // Toma una serie de fotografias
@@ -52,7 +53,8 @@ public class Camara : GLib.Object{
                 GLib.stdout.printf("Error: %s\n", err.message);
                 GLib.stdout.flush(); loop.quit(); break;
             default:
-                if (message.get_structure().get_name() == "pixbuf"){get_pixbuf();}
+                if (message.get_structure().get_name() == "pixbuf"){
+                    get_pixbuf();}
                 break;}
         return true;
         }
@@ -94,10 +96,50 @@ public class Camara : GLib.Object{
         if (file.query_exists() != true){
             Gst.Element sink = player.get_by_name("gdkpixbufsink");
             Gdk.Pixbuf pixbuf; sink.get("last-pixbuf", out pixbuf);
-            pixbuf.save(path, "png", null);}
+
+            GLib.Idle.add (() => {
+                save(pixbuf, path);
+                return false;
+            });
+
+            /*
+            //https://wiki.gnome.org/Projects/Vala/AsyncSamples
+            Test.Async myasync = new Test.Async();
+            GLib.MainLoop mainloop2 = new GLib.MainLoop();
+            myasync.save.begin(pixbuf, path, (obj, res) => {
+                //bool sentence = myasync.save.end(res);
+                //GLib.stdout.printf("%s\n", sentence); GLib.stdout.flush();
+                mainloop2.quit();});
+            mainloop2.run();
+            //GLib.stdout.printf("ON\n"); GLib.stdout.flush();
+            */
+
+            /*
+            Gst.Element sink = player.get_by_name("gdkpixbufsink");
+            Gdk.Pixbuf pixbuf; sink.get("last-pixbuf", out pixbuf);
+            pixbuf.save(path, "png", null);*/}
     }
 
+    private bool save(Gdk.Pixbuf pixbuf, string path){
+        try {pixbuf.save(path, "png", null);}
+        catch (Error err) {
+            GLib.stdout.printf("Error: %s\n", err.message); GLib.stdout.flush();}
+        return false;
+    }
 }
+
+/*
+class Test.Async : GLib.Object {
+    public async bool save(Gdk.Pixbuf pixbuf, string path) {
+        try {pixbuf.save(path, "png", null);}
+        catch (Error err) {
+            GLib.stdout.printf("Error: %s\n", err.message); GLib.stdout.flush();}
+        GLib.Idle.add(this.save.callback);
+        yield;
+        return true;
+    }
+}
+*/
 
 
 public static int main (string[] args) {
