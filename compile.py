@@ -8,7 +8,7 @@ BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def run():
-    comando = "valac --pkg gio-2.0 --pkg gtk+-3.0 --pkg gdk-3.0 --thread"
+    comando = "valac --pkg posix --pkg gio-2.0 --pkg gtk+-3.0 --pkg gdk-3.0 --thread"
     comando = "%s %s" % (comando, " --pkg glib-2.0 --pkg gdk-x11-3.0")
     comando = "%s %s" % (comando, " --pkg gstreamer-1.0 --pkg gstreamer-video-1.0")
     comando = "%s %s" % (comando, " main.vala")

@@ -42,7 +42,11 @@ public class Camara : GLib.Object{
         player.add(camara); player.add(videoconvert); player.add(gdkpixbufsink);
         camara.link(videoconvert); videoconvert.link(gdkpixbufsink);
 
-        player.set_state(Gst.State.PLAYING); loop.run();
+        player.set_state(Gst.State.PLAYING);
+
+        GLib.stdout.printf("Process Id: %i\n", Posix.getpid());
+        GLib.stdout.flush();
+        loop.run();
     }
 
     private bool sync_message(Gst.Bus bus, Gst.Message message){
